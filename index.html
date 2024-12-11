@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordplay</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('images/bg.jpg');
+            background-repeat: repeat-x;
+            background-size: cover;
+            animation: moveBackground 10s linear infinite;
+            margin: 0;
+            padding: 0;
+        }
+        @keyframes moveBackground {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: -1000px 0;
+            }
+        }
+        .container {
+            margin-top: 100px;
+        }
+        h1 {
+            font-size: 48px;
+            margin-bottom: 50px;
+        }
+        .menu {
+            display: inline-block;
+            text-align: left;
+        }
+        .menu-item {
+            display: block;
+            padding: 15px 30px;
+            margin: 10px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 24px;
+            transition: background-color 0.3s ease;
+        }
+        .menu-item:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <audio id="click-sound" src="sounds/soundeffect.mp3"></audio>
+    <div class="container">
+        <h1>Wordplay!</h1>
+        <div class="menu">
+            <a href="stage1.html" class="menu-item" id="stage1" onclick="playClickSound(event)">Start</a>
+            <a href="dictionary.html" class="menu-item" id="dictionary" onclick="playClickSound(event)">Dictionary</a>
+        </div>
+    </div>
+
+    <script>
+        function playClickSound(event) {
+            const sound = document.getElementById('click-sound');
+            event.preventDefault();
+
+            // Play the sound
+            sound.play().then(() => {
+                console.log("Sound played");
+
+                // Set a delay to give the sound time to finish
+                setTimeout(() => {
+                    window.location.href = event.target.href;
+                }, sound.duration * 1000); // Delay in milliseconds (duration of the sound in seconds)
+            }).catch((error) => {
+                console.log("Error playing sound: ", error);
+                window.location.href = event.target.href; // Fallback to redirect immediately on error
+            });
+        }
+    </script>
+</body>
+</html>

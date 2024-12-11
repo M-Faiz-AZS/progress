@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stage 1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('images/bg.jpg');
+            background-repeat: repeat-x;
+            background-size: cover;
+            animation: moveBackground 10s linear infinite;
+            margin: 0;
+            padding: 0;
+        }
+        @keyframes moveBackground {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: -1000px 0;
+            }
+        }
+        .go-back, .next-stage {
+            position: absolute;
+            top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .go-back:hover, .next-stage:hover {
+            background-color: #0056b3;
+        }
+        .go-back {
+            left: 20px;
+        }
+        .next-stage {
+            right: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+        }
+        h4 {
+            text-align: center;
+        }
+        .image-container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <audio id="click-sound" src="sounds/soundeffect.mp3"></audio>
+    <a href="stage1.html" class="go-back" onclick="playClickSound(event)">Go Back</a>
+    <a href="index.html" class="next-stage" onclick="playClickSound(event)">Finish</a>
+
+    <h1>Stage 2</h1>
+
+    <script>
+        function playClickSound(event) {
+            const sound = document.getElementById('click-sound');
+            event.preventDefault();
+
+            // Play the sound
+            sound.play().then(() => {
+                console.log("Sound played");
+
+                // Set a delay to give the sound time to finish
+                setTimeout(() => {
+                    window.location.href = event.target.href;
+                }, sound.duration * 1000); // Delay in milliseconds (duration of the sound in seconds)
+            }).catch((error) => {
+                console.log("Error playing sound: ", error);
+                window.location.href = event.target.href; // Fallback to redirect immediately on error
+            });
+        }
+    </script>
+</body>
+</html>

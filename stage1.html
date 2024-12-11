@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stage 1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('images/bg.jpg');
+            background-repeat: repeat-x;
+            background-size: cover;
+            animation: moveBackground 10s linear infinite;
+            margin: 0;
+            padding: 0;
+        }
+        @keyframes moveBackground {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: -1000px 0;
+            }
+        }
+        .go-back, .next-stage {
+            position: absolute;
+            top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .go-back:hover, .next-stage:hover {
+            background-color: #0056b3;
+        }
+        .go-back {
+            left: 20px;
+        }
+        .next-stage {
+            right: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+        }
+        h4 {
+            text-align: center;
+        }
+        .image-container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            width: 400px;
+        }
+        .question-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+            margin-top: 10px;
+        }
+        .hint {
+            color: red;
+            margin-top: 5px;
+        }
+        .correct-answer {
+            color: green;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <audio id="click-sound" src="sounds/soundeffect.mp3"></audio>
+    <a href="index.html" class="go-back" onclick="playClickSound(event)">Go Back</a>
+    <a href="stage2.html" class="next-stage" onclick="playClickSound(event)">Next</a>
+    <h1>Stage 1</h1>
+    <div class="image-container">
+        <img src="images/conversation.jpg" alt="conversation" id="stage-image">
+    </div>
+    <h4>Answer the questions below using only 1 word</h4>
+    <div class="question-container">
+        <div class="question">
+            <p>Question 1: What is Albert's nickname?</p>
+            <input type="text" id="answer1" placeholder="Your answer here">
+            <button onclick="checkAnswer('answer1', 'hint1', 'Al', 'first two letters of Albert\'s name')">Submit</button>
+            <div class="hint" id="hint1" style="display:none;"></div>
+            <div class="correct-answer" id="correctAnswer1" style="display:none;"></div>
+        </div>
+        <div class="question">
+            <p>Question 2: What was the temperature like before this?</p>
+            <input type="text" id="answer2" placeholder="Your answer here">
+            <button onclick="checkAnswer('answer2', 'hint2', 'hot', 'opposite of cold')">Submit</button>
+            <div class="hint" id="hint2" style="display:none;"></div>
+            <div class="correct-answer" id="correctAnswer2" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        function playClickSound(event) {
+            const sound = document.getElementById('click-sound');
+            event.preventDefault();
+
+            // Play the sound
+            sound.play().then(() => {
+                console.log("Sound played");
+
+                // Set a delay to give the sound time to finish
+                setTimeout(() => {
+                    window.location.href = event.target.href;
+                }, sound.duration * 1000); // Delay in milliseconds (duration of the sound in seconds)
+            }).catch((error) => {
+                console.log("Error playing sound: ", error);
+                window.location.href = event.target.href; // Fallback to redirect immediately on error
+            });
+        }
+
+        function checkAnswer(answerId, hintId, correctAnswer, hintText) {
+            const answerInput = document.getElementById(answerId);
+            const hintDisplay = document.getElementById(hintId);
+            const userAnswer = answerInput.value.trim().toLowerCase();
+
+            if (userAnswer === correctAnswer.toLowerCase()) {
+                hintDisplay.style.display = 'none';
+                const correctAnswerDisplay = document.getElementById('correctAnswer' + answerId.charAt(answerId.length - 1));
+                correctAnswerDisplay.textContent = "Correct!";
+                correctAnswerDisplay.style.display = 'block';
+            } else {
+                hintDisplay.textContent = "Hint: " + hintText;
+                hintDisplay.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
