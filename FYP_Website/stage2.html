@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stage 2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('images/bg.jpg');
+            background-repeat: repeat-x;
+            background-size: cover;
+            animation: moveBackground 10s linear infinite;
+            margin: 0;
+            padding: 0;
+        }
+        @keyframes moveBackground {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: -1000px 0;
+            }
+        }
+        .go-back, .next-stage {
+            position: absolute;
+            top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .go-back:hover, .next-stage:hover {
+            background-color: #0056b3;
+        }
+        .go-back {
+            left: 20px;
+        }
+        .next-stage {
+            right: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .content-container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .censored-word {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .meaning-container {
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .meaning-box {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: left;
+        }
+        .toggle-button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .toggle-button:hover {
+            background-color: #0056b3;
+        }
+        .answer-section {
+            margin-top: 30px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+            margin-right: 10px;
+        }
+        .submit-button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .hint {
+            color: red;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        .partial-word {
+            font-size: 20px;
+            margin-top: 10px;
+            letter-spacing: 3px;
+        }
+    </style>
+</head>
+<body>
+    <audio id="click-sound" src="sounds/soundeffect.mp3"></audio>
+    <audio id="bg-music" src="sounds/bgmusic.mp3" loop></audio>
+    
+    <a href="stage1.html" class="go-back" onclick="playClickSound(event)">Go Back</a>
+    <a href="stage3.html" class="next-stage" onclick="playClickSound(event)">Next</a>
+    
+    <h1>Stage 2</h1>
+    
+    <div class="content-container">
+        <div class="censored-word">_ _ _ _ _</div>
+        
+        <div class="meaning-container">
+            <div id="meaning-box" class="meaning-box">
+                <strong>to go somewhere secretly, or to take someone or something somewhere secretly</strong>
+            </div>
+            <button id="toggle-lang" class="toggle-button" onclick="toggleLanguage()">
+                the meaning in malay
+            </button>
+        </div>
+        
+        <div class="answer-section">
+            <input type="text" id="answer-input" placeholder="Your answer">
+            <button class="submit-button" onclick="checkAnswer()">Submit</button>
+            <div id="hint" class="hint"></div>
+            <div id="partial-word" class="partial-word"></div>
+        </div>
+    </div>
+
+    <script>
+        let attempts = 0;
+        let isEnglish = true;
+        const englishText = "<strong>to go somewhere secretly, or to take someone or something somewhere secretly</strong>";
+        const malayText = "bergerak dengan pantas (untuk menyembunyikan diri), menyorok, menyusup";
+
+        function toggleLanguage() {
+            const meaningBox = document.getElementById('meaning-box');
+            const toggleButton = document.getElementById('toggle-lang');
+            
+            isEnglish = !isEnglish;
+            
+            if (isEnglish) {
+                meaningBox.innerHTML = englishText;
+                toggleButton.textContent = 'the meaning in malay';
+            } else {
+                meaningBox.innerHTML = malayText;
+                toggleButton.textContent = 'the meaning in english';
+            }
+        }
+
+        function checkAnswer() {
+            const answer = document.getElementById('answer-input').value.toLowerCase().trim();
+            const hintElement = document.getElementById('hint');
+            const partialWordElement = document.getElementById('partial-word');
+            
+            if (answer === 'sneak') {
+                hintElement.style.color = 'green';
+                hintElement.textContent = 'Correct!';
+                partialWordElement.textContent = '';
+                // You might want to enable the next stage button here
+            } else {
+                attempts++;
+                if (attempts === 1) {
+                    partialWordElement.textContent = '__ea_';
+                } else if (attempts === 2) {
+                    partialWordElement.textContent = 'snea_';
+                } else if (attempts >= 3) {
+                    hintElement.textContent = 'Hint: menyelinap';
+                }
+            }
+        }
+
+        // Persistent music state
+        let musicState = { 
+            playing: false, 
+            currentTime: 0 
+        };
+
+        // Play background music when page loads
+        window.addEventListener('load', () => {
+            const bgMusic = document.getElementById('bg-music');
+            
+            try {
+                // Restore volume settings
+                const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+                const musicVolume = savedVolumes.musicVolume || 1;
+                
+                // Restore music state from localStorage
+                const savedMusicStateString = localStorage.getItem('musicState');
+                console.log('Saved Music State:', savedMusicStateString);
+                
+                if (savedMusicStateString) {
+                    try {
+                        musicState = JSON.parse(savedMusicStateString);
+                    } catch (parseError) {
+                        console.error('Error parsing saved music state:', parseError);
+                        musicState = { playing: false, currentTime: 0 };
+                    }
+                }
+                
+                // Set volume
+                bgMusic.volume = musicVolume;
+                
+                // Always try to play music
+                bgMusic.play().then(() => {
+                    console.log('Music started playing');
+                    musicState.playing = true;
+                    
+                    // If there's a saved time, set it
+                    if (musicState.currentTime) {
+                        bgMusic.currentTime = musicState.currentTime;
+                    }
+                    
+                    // Update music state in localStorage
+                    localStorage.setItem('musicState', JSON.stringify({
+                        playing: true,
+                        currentTime: bgMusic.currentTime
+                    }));
+                }).catch((error) => {
+                    console.error('Error playing music:', error);
+                    
+                    // Add a user interaction listener as a fallback
+                    document.addEventListener('click', function startMusicOnClick() {
+                        bgMusic.play().then(() => {
+                            console.log('Music started on click');
+                            musicState.playing = true;
+                            
+                            // If there's a saved time, set it
+                            if (musicState.currentTime) {
+                                bgMusic.currentTime = musicState.currentTime;
+                            }
+                            
+                            localStorage.setItem('musicState', JSON.stringify({
+                                playing: true,
+                                currentTime: bgMusic.currentTime
+                            }));
+                            document.removeEventListener('click', startMusicOnClick);
+                        }).catch((err) => {
+                            console.error('Still could not play music:', err);
+                        });
+                    });
+                });
+            } catch (generalError) {
+                console.error('General error in music initialization:', generalError);
+            }
+        });
+
+        function playClickSound(event) {
+            const sound = document.getElementById('click-sound');
+            const bgMusic = document.getElementById('bg-music');
+            
+            // Get saved volume settings
+            const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+            const soundVolume = savedVolumes.soundVolume || 1;
+            
+            // Set sound volume
+            sound.volume = soundVolume;
+            
+            // Update music state before navigating
+            musicState.currentTime = bgMusic.currentTime;
+            musicState.playing = !bgMusic.paused;
+            
+            // Always save the current music state before navigating
+            localStorage.setItem('musicState', JSON.stringify({
+                playing: musicState.playing,
+                currentTime: musicState.currentTime
+            }));
+            
+            event.preventDefault();
+            // Ensure sound plays before navigation
+            sound.play().then(() => {
+                // Use setTimeout to allow sound to finish
+                setTimeout(() => {
+                    // Navigate to the new page
+                    window.location.href = event.target.href;
+                }, sound.duration * 1000);
+            }).catch((error) => {
+                // If sound fails, still navigate
+                window.location.href = event.target.href;
+            });
+        }
+    </script>
+</body>
+</html>

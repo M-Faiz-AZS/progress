@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medium Level 3</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('images/bg.jpg');
+            background-repeat: repeat-x;
+            background-size: cover;
+            animation: moveBackground 10s linear infinite;
+            margin: 0;
+            padding: 0;
+        }
+
+        @keyframes moveBackground {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: -1000px 0;
+            }
+        }
+
+        .container {
+            margin-top: 80px;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 40px;
+            color: #fff;
+        }
+
+        .back-button, .next-button {
+            position: absolute;
+            padding: 15px 30px;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button {
+            top: 20px;
+            left: 20px;
+            background-color: #007BFF;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+
+        .next-button {
+            top: 20px;
+            right: 20px;
+            background-color: #28a745;
+        }
+
+        .next-button:hover {
+            background-color: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+    <audio id="click-sound" src="sounds/soundeffect.mp3"></audio>
+    <audio id="bg-music" src="sounds/bgmusic.mp3" loop></audio>
+
+    <!-- Back to Level 2 -->
+    <a href="level2medium.html" class="back-button" onclick="playClickSound(event)">Back</a>
+
+    <!-- Next to Level 4 -->
+    <a href="level4medium.html" class="next-button" onclick="playClickSound(event)">Next</a>
+
+    <div class="container">
+        <h1>Medium Level 3</h1>
+
+        <!-- Content area: currently blank -->
+        <div class="level-content">
+            <!-- You can add your question, images, game elements here later -->
+        </div>
+    </div>
+
+    <script>
+        let musicState = { playing: false, currentTime: 0 };
+
+        window.addEventListener('load', () => {
+            const bgMusic = document.getElementById('bg-music');
+            try {
+                const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+                const musicVolume = savedVolumes.musicVolume || 1;
+                const savedMusicStateString = localStorage.getItem('musicState');
+
+                if (savedMusicStateString) {
+                    try {
+                        musicState = JSON.parse(savedMusicStateString);
+                    } catch (parseError) {
+                        console.error('Error parsing saved music state:', parseError);
+                        musicState = { playing: false, currentTime: 0 };
+                    }
+                }
+
+                bgMusic.volume = musicVolume;
+
+                bgMusic.play().then(() => {
+                    musicState.playing = true;
+                    if (musicState.currentTime) bgMusic.currentTime = musicState.currentTime;
+                    localStorage.setItem('musicState', JSON.stringify({
+                        playing: true,
+                        currentTime: bgMusic.currentTime
+                    }));
+                }).catch(() => {
+                    document.addEventListener('click', function startMusicOnClick() {
+                        bgMusic.play().then(() => {
+                            musicState.playing = true;
+                            if (musicState.currentTime) bgMusic.currentTime = musicState.currentTime;
+                            localStorage.setItem('musicState', JSON.stringify({
+                                playing: true,
+                                currentTime: bgMusic.currentTime
+                            }));
+                            document.removeEventListener('click', startMusicOnClick);
+                        });
+                    });
+                });
+            } catch (e) {
+                console.error('General error in music initialization:', e);
+            }
+        });
+
+        function playClickSound(event) {
+            const sound = document.getElementById('click-sound');
+            const bgMusic = document.getElementById('bg-music');
+            const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+            const soundVolume = savedVolumes.soundVolume || 1;
+
+            sound.volume = soundVolume;
+            musicState.currentTime = bgMusic.currentTime;
+            musicState.playing = !bgMusic.paused;
+
+            localStorage.setItem('musicState', JSON.stringify({
+                playing: musicState.playing,
+                currentTime: musicState.currentTime
+            }));
+
+            event.preventDefault();
+            sound.play().then(() => {
+                setTimeout(() => {
+                    window.location.href = event.target.href;
+                }, sound.duration * 1000);
+            }).catch(() => {
+                window.location.href = event.target.href;
+            });
+        }
+    </script>
+</body>
+</html>
