@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Difficulty</title>
+    <style>
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('images/bg.jpg');
+            background-repeat: repeat-x;
+            background-size: cover;
+            animation: moveBackground 10s linear infinite;
+            margin: 0;
+            padding: 0;
+        }
+
+        @keyframes moveBackground {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: -1000px 0;
+            }
+        }
+
+        .container {
+            margin-top: 100px;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 50px;
+        }
+
+        .menu {
+            display: inline-block;
+            text-align: left;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        .easy {
+            background-color: #28a745; /* Green */
+        }
+
+        .easy:hover {
+            background-color: #218838; /* Darker green */
+        }
+
+        .medium {
+            background-color: #ffc107; /* Yellow */
+        }
+
+        .medium:hover {
+            background-color: #e0a800; /* Darker yellow */
+        }
+
+        .hard {
+            background-color: #dc3545; /* Red */
+        }
+
+        .hard:hover {
+            background-color: #c82333; /* Darker red */
+        }
+
+        /* Back button style */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 15px 30px;
+            background-color: #007BFF; /* Blue */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <audio id="click-sound" src="/FYP_Website/sounds/soundeffect.mp3"></audio>
+    <audio id="bg-music" src="/FYP_Website/sounds/bgmusic.mp3" loop></audio>
+
+    <!-- Back button to return to the index page -->
+    <a href="index.html" class="back-button" onclick="playClickSound(event)">Back</a>
+
+    <div class="container">
+        <h1>Choose Difficulty!</h1>
+        <div class="menu">
+            <a href="levels/easy.html" class="menu-item easy" onclick="playClickSound(event)">Easy</a>
+            <a href="levels/medium.html" class="menu-item medium" onclick="playClickSound(event)">Medium</a>
+            <a href="levels/hard.html" class="menu-item hard" onclick="playClickSound(event)">Hard</a>
+        </div>
+    </div>
+
+    <script>
+        // Persistent music state
+        let musicState = { 
+            playing: false, 
+            currentTime: 0 
+        };
+
+        // Play background music when page loads
+        window.addEventListener('load', () => {
+            const bgMusic = document.getElementById('bg-music');
+            
+            try {
+                const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+                const musicVolume = savedVolumes.musicVolume || 1;
+                const savedMusicStateString = localStorage.getItem('musicState');
+                console.log('Saved Music State:', savedMusicStateString);
+                
+                if (savedMusicStateString) {
+                    try {
+                        musicState = JSON.parse(savedMusicStateString);
+                    } catch (parseError) {
+                        console.error('Error parsing saved music state:', parseError);
+                        musicState = { playing: false, currentTime: 0 };
+                    }
+                }
+                
+                bgMusic.volume = musicVolume;
+
+                bgMusic.play().then(() => {
+                    console.log('Music started playing');
+                    musicState.playing = true;
+
+                    if (musicState.currentTime) {
+                        bgMusic.currentTime = musicState.currentTime;
+                    }
+
+                    localStorage.setItem('musicState', JSON.stringify({
+                        playing: true,
+                        currentTime: bgMusic.currentTime
+                    }));
+                }).catch((error) => {
+                    console.error('Error playing music:', error);
+
+                    document.addEventListener('click', function startMusicOnClick() {
+                        bgMusic.play().then(() => {
+                            console.log('Music started on click');
+                            musicState.playing = true;
+
+                            if (musicState.currentTime) {
+                                bgMusic.currentTime = musicState.currentTime;
+                            }
+
+                            localStorage.setItem('musicState', JSON.stringify({
+                                playing: true,
+                                currentTime: bgMusic.currentTime
+                            }));
+                            document.removeEventListener('click', startMusicOnClick);
+                        }).catch((err) => {
+                            console.error('Still could not play music:', err);
+                        });
+                    });
+                });
+            } catch (generalError) {
+                console.error('General error in music initialization:', generalError);
+            }
+        });
+
+        function playClickSound(event) {
+            const sound = document.getElementById('click-sound');
+            const bgMusic = document.getElementById('bg-music');
+            
+            const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+            const soundVolume = savedVolumes.soundVolume || 1;
+            sound.volume = soundVolume;
+
+            musicState.currentTime = bgMusic.currentTime;
+            musicState.playing = !bgMusic.paused;
+            
+            localStorage.setItem('musicState', JSON.stringify({
+                playing: musicState.playing,
+                currentTime: musicState.currentTime
+            }));
+            
+            event.preventDefault();
+
+            sound.play().then(() => {
+                setTimeout(() => {
+                    window.location.href = event.target.href;
+                }, sound.duration * 1000);
+            }).catch((error) => {
+                window.location.href = event.target.href;
+            });
+        }
+    </script>
+</body>
+</html>

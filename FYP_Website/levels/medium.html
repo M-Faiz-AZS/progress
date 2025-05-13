@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medium Levels</title>
+    <style>
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('/FYP_Website/images/bg.jpg');
+            background-repeat: repeat-x;
+            background-size: cover;
+            animation: moveBackground 10s linear infinite;
+            margin: 0;
+            padding: 0;
+        }
+
+        @keyframes moveBackground {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: -1000px 0;
+            }
+        }
+
+        .container {
+            margin-top: 80px;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 40px;
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 15px;
+            background-color: #ffc107; /* Yellow */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu-item:hover {
+            background-color: #e0a800;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 15px 30px;
+            background-color: #007BFF; /* Blue */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Remove contact info from here */
+    </style>
+</head>
+<body>
+    <audio id="click-sound" src="/FYP_Website/sounds/soundeffect.mp3"></audio>
+    <audio id="bg-music" src="/FYP_Website/sounds/bgmusic.mp3" loop></audio>
+
+    <!-- Back button to return to the difficulty page -->
+    <a href="/FYP_Website/difficulty.html" class="back-button" onclick="playClickSound(event)">Back</a>
+
+    <div class="container">
+        <h1>Medium Levels</h1>
+        <div class="menu">
+            <!-- 10 buttons for levels -->
+            <a href="level1medium.html" class="menu-item" onclick="playClickSound(event)">Level 1</a>
+            <a href="level2medium.html" class="menu-item" onclick="playClickSound(event)">Level 2</a>
+            <a href="level3medium.html" class="menu-item" onclick="playClickSound(event)">Level 3</a>
+            <a href="level4medium.html" class="menu-item" onclick="playClickSound(event)">Level 4</a>
+            <a href="level5medium.html" class="menu-item" onclick="playClickSound(event)">Level 5</a>
+            <a href="level6medium.html" class="menu-item" onclick="playClickSound(event)">Level 6</a>
+            <a href="level7medium.html" class="menu-item" onclick="playClickSound(event)">Level 7</a>
+            <a href="level8medium.html" class="menu-item" onclick="playClickSound(event)">Level 8</a>
+            <a href="level9medium.html" class="menu-item" onclick="playClickSound(event)">Level 9</a>
+            <a href="level10medium.html" class="menu-item" onclick="playClickSound(event)">Level 10</a>
+        </div>
+    </div>
+
+    <script>
+        let musicState = { playing: false, currentTime: 0 };
+
+        window.addEventListener('load', () => {
+            const bgMusic = document.getElementById('bg-music');
+            try {
+                const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+                const musicVolume = savedVolumes.musicVolume || 1;
+                const savedMusicStateString = localStorage.getItem('musicState');
+
+                if (savedMusicStateString) {
+                    try {
+                        musicState = JSON.parse(savedMusicStateString);
+                    } catch (parseError) {
+                        console.error('Error parsing saved music state:', parseError);
+                        musicState = { playing: false, currentTime: 0 };
+                    }
+                }
+
+                bgMusic.volume = musicVolume;
+
+                bgMusic.play().then(() => {
+                    musicState.playing = true;
+                    if (musicState.currentTime) bgMusic.currentTime = musicState.currentTime;
+                    localStorage.setItem('musicState', JSON.stringify({
+                        playing: true,
+                        currentTime: bgMusic.currentTime
+                    }));
+                }).catch(() => {
+                    document.addEventListener('click', function startMusicOnClick() {
+                        bgMusic.play().then(() => {
+                            musicState.playing = true;
+                            if (musicState.currentTime) bgMusic.currentTime = musicState.currentTime;
+                            localStorage.setItem('musicState', JSON.stringify({
+                                playing: true,
+                                currentTime: bgMusic.currentTime
+                            }));
+                            document.removeEventListener('click', startMusicOnClick);
+                        });
+                    });
+                });
+            } catch (e) {
+                console.error('General error in music initialization:', e);
+            }
+        });
+
+        function playClickSound(event) {
+            const sound = document.getElementById('click-sound');
+            const bgMusic = document.getElementById('bg-music');
+            const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+            const soundVolume = savedVolumes.soundVolume || 1;
+
+            sound.volume = soundVolume;
+            musicState.currentTime = bgMusic.currentTime;
+            musicState.playing = !bgMusic.paused;
+
+            localStorage.setItem('musicState', JSON.stringify({
+                playing: musicState.playing,
+                currentTime: musicState.currentTime
+            }));
+
+            event.preventDefault();
+            sound.play().then(() => {
+                setTimeout(() => {
+                    window.location.href = event.target.href;
+                }, sound.duration * 1000);
+            }).catch(() => {
+                window.location.href = event.target.href;
+            });
+        }
+    </script>
+</body>
+</html>
