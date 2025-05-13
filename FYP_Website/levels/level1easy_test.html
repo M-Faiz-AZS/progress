@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Level 1 - Fruits</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('/FYP_Website/images/bg.jpg');
+            background-repeat: repeat-x;
+            background-size: cover;
+            animation: moveBackground 10s linear infinite;
+            margin: 0;
+            padding: 0;
+        }
+
+        @keyframes moveBackground {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: -1000px 0;
+            }
+        }
+
+        .container {
+            margin-top: 80px;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 40px;
+            color: #000000;
+        }
+
+        .back-button, .next-button, .change-level-button {
+            position: fixed;
+            top: 20px;
+            padding: 15px 30px;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button {
+            left: 20px;
+            background-color: #007BFF;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+
+        .change-level-button {
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ffc107;
+        }
+
+        .change-level-button:hover {
+            background-color: #e0a800;
+        }
+
+        .next-button {
+            right: 20px;
+            background-color: #28a745;
+        }
+
+        .next-button:hover {
+            background-color: #1e7e34;
+        }
+
+        .level-content {
+            margin-top: 100px;
+        }
+
+        .matching-game {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            margin: 30px auto;
+            max-width: 900px;
+        }
+
+        .draggable-items, .drop-targets {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .draggable-item {
+            border: 2px solid #007BFF;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: grab;
+            font-size: 18px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            min-width: 120px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Color coding for fruits */
+        .draggable-item[data-word="apple"] {
+            background-color: #e74c3c; /* Apple red */
+        }
+        .draggable-item[data-word="banana"] {
+            background-color: #f1c40f; /* Banana yellow */
+        }
+        .draggable-item[data-word="orange"] {
+            background-color: #e67e22; /* Orange orange */
+        }
+        .draggable-item[data-word="grape"] {
+            background-color: #9b59b6; /* Grape purple */
+        }
+
+        .draggable-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .draggable-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .drop-target {
+            background-color: #e9ecef;
+            border: 2px dashed #6c757d;
+            border-radius: 8px;
+            min-height: 60px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-width: 180px;
+        }
+
+        .drop-target.highlight {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+
+        .drop-target.correct {
+            background-color: #d4edda;
+            border-style: solid;
+        }
+
+        .drop-target.incorrect {
+            background-color: #f8d7da;
+            border-style: solid;
+        }
+
+        .target-image {
+            max-width: 150px;
+            max-height: 150px;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            font-size: 20px;
+            min-height: 30px;
+        }
+
+        .correct-feedback {
+            color: #28a745;
+        }
+
+        .incorrect-feedback {
+            color: #dc3545;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .check-button, .reset-button, .translate-button {
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .check-button {
+            background-color: #17a2b8;
+        }
+
+        .check-button:hover {
+            background-color: #138496;
+        }
+
+        .reset-button {
+            background-color: #6c757d;
+        }
+
+        .reset-button:hover {
+            background-color: #5a6268;
+        }
+
+        .translate-button {
+            background-color: #6f42c1;
+        }
+        
+        .translate-button:hover {
+            background-color: #5a32a3;
+        }
+
+        
+    </style>
+</head>
+<body>
+    <audio id="grab-sound" src="sounds/grab.mp3"></audio>
+    <audio id="drop-sound" src="sounds/drop.mp3"></audio>
+    <audio id="success-sound" src="sounds/success.mp3"></audio>
+    <audio id="click-sound" src="sounds/soundeffect.mp3"></audio>
+    <audio id="bg-music" src="sounds/bgmusic.mp3" loop></audio>
+
+    <a href="levels/easy.html" class="back-button" onclick="playClickSound(event)">Back</a>
+    <a href="levels/easy.html" class="change-level-button" onclick="playClickSound(event)">Change Level</a>
+    <a href="level2easy.html" class="next-button" onclick="playClickSound(event)">Next</a>
+
+    <div class="container">
+        <h1>Easy Level 1 - Fruits</h1>
+        <div class="level-content">
+            <div class="matching-game">
+                <!-- Drop targets at the top -->
+                <div class="drop-targets">
+                    <div class="drop-target" data-target="apple">
+                        <img src="images/apple.jpg" alt="Apple" class="target-image">
+                    </div>
+                    <div class="drop-target" data-target="banana">
+                        <img src="images/banana.jpeg" alt="Banana" class="target-image">
+                    </div>
+                    <div class="drop-target" data-target="orange">
+                        <img src="images/orange.jpg" alt="Orange" class="target-image">
+                    </div>
+                </div>
+                
+                <!-- Draggable items at the bottom -->
+                <div class="draggable-items">
+                    <div class="draggable-item" draggable="true" data-word="orange" data-malay="Oren">Orange</div>
+                    <div class="draggable-item" draggable="true" data-word="apple" data-malay="Epal">Apple</div>
+                    <div class="draggable-item" draggable="true" data-word="banana" data-malay="Pisang">Banana</div>
+                    <div class="draggable-item" draggable="true" data-word="grape" data-malay="Anggur">Grape</div>
+                </div>
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="button-container">
+                <button class="reset-button" id="reset-button">Reset Game</button>
+                <button class="translate-button" id="translate-button">Bahasa Melayu</button>
+                <button class="check-button" id="check-button">Check Answers</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let musicState = { playing: false, currentTime: 0 };
+        let isTranslated = false;
+        const originalTexts = {};
+
+        function checkAllCorrect() {
+            const dropTargets = document.querySelectorAll('.drop-target');
+            let allCorrect = true;
+            
+            dropTargets.forEach(target => {
+                const targetWord = target.getAttribute('data-target');
+                const droppedItem = target.querySelector('.draggable-item');
+                
+                if (!droppedItem || droppedItem.getAttribute('data-word') !== targetWord) {
+                    allCorrect = false;
+                }
+            });
+            
+            return allCorrect;
+        }
+
+        function switchToEnglish() {
+            const draggableItems = document.querySelectorAll('.draggable-item');
+            const translateButton = document.getElementById('translate-button');
+            
+            draggableItems.forEach(item => {
+                item.textContent = originalTexts[item.dataset.word];
+            });
+            translateButton.textContent = 'Bahasa Melayu';
+            isTranslated = false;
+        }
+
+        window.addEventListener('load', () => {
+            const bgMusic = document.getElementById('bg-music');
+            try {
+                const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+                const musicVolume = savedVolumes.musicVolume || 1;
+                const savedMusicStateString = localStorage.getItem('musicState');
+
+                if (savedMusicStateString) {
+                    try {
+                        musicState = JSON.parse(savedMusicStateString);
+                    } catch (parseError) {
+                        console.error('Error parsing saved music state:', parseError);
+                        musicState = { playing: false, currentTime: 0 };
+                    }
+                }
+
+                bgMusic.volume = musicVolume;
+
+                bgMusic.play().then(() => {
+                    musicState.playing = true;
+                    if (musicState.currentTime) bgMusic.currentTime = musicState.currentTime;
+                    localStorage.setItem('musicState', JSON.stringify({
+                        playing: true,
+                        currentTime: bgMusic.currentTime
+                    }));
+                }).catch(() => {
+                    document.addEventListener('click', function startMusicOnClick() {
+                        bgMusic.play().then(() => {
+                            musicState.playing = true;
+                            if (musicState.currentTime) bgMusic.currentTime = musicState.currentTime;
+                            localStorage.setItem('musicState', JSON.stringify({
+                                playing: true,
+                                currentTime: bgMusic.currentTime
+                            }));
+                            document.removeEventListener('click', startMusicOnClick);
+                        });
+                    });
+                });
+            } catch (e) {
+                console.error('General error in music initialization:', e);
+            }
+            
+            initDragAndDrop();
+            
+            const translateButton = document.getElementById('translate-button');
+            
+            document.querySelectorAll('.draggable-item').forEach(item => {
+                originalTexts[item.dataset.word] = item.textContent;
+            });
+            
+            translateButton.addEventListener('click', () => {
+                const draggableItems = document.querySelectorAll('.draggable-item');
+                const clickSound = document.getElementById('click-sound');
+                const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+                const soundVolume = savedVolumes.soundVolume || 1;
+                
+                clickSound.volume = soundVolume;
+                clickSound.play();
+                
+                if (!isTranslated) {
+                    draggableItems.forEach(item => {
+                        item.textContent = item.dataset.malay;
+                    });
+                    translateButton.textContent = 'English';
+                    isTranslated = true;
+                } else {
+                    switchToEnglish();
+                }
+            });
+        });
+
+        function playClickSound(event) {
+            const sound = document.getElementById('click-sound');
+            const bgMusic = document.getElementById('bg-music');
+            const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+            const soundVolume = savedVolumes.soundVolume || 1;
+
+            sound.volume = soundVolume;
+            musicState.currentTime = bgMusic.currentTime;
+            musicState.playing = !bgMusic.paused;
+
+            localStorage.setItem('musicState', JSON.stringify({
+                playing: musicState.playing,
+                currentTime: musicState.currentTime
+            }));
+
+            event.preventDefault();
+            sound.play().then(() => {
+                setTimeout(() => {
+                    window.location.href = event.target.href;
+                }, sound.duration * 1000);
+            }).catch(() => {
+                window.location.href = event.target.href;
+            });
+        }
+        
+        function initDragAndDrop() {
+            const draggableItems = document.querySelectorAll('.draggable-item');
+            const dropTargets = document.querySelectorAll('.drop-target');
+            const checkButton = document.getElementById('check-button');
+            const resetButton = document.getElementById('reset-button');
+            const feedback = document.getElementById('feedback');
+            const grabSound = document.getElementById('grab-sound');
+            const dropSound = document.getElementById('drop-sound');
+            const successSound = document.getElementById('success-sound');
+            const translateButton = document.getElementById('translate-button');
+            
+            let draggedItem = null;
+            
+            const setSoundVolume = () => {
+                const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+                const soundVolume = savedVolumes.soundVolume || 1;
+                grabSound.volume = soundVolume;
+                dropSound.volume = soundVolume;
+                successSound.volume = soundVolume;
+            };
+            
+            draggableItems.forEach(item => {
+                item.addEventListener('dragstart', function() {
+                    setSoundVolume();
+                    draggedItem = this;
+                    setTimeout(() => {
+                        this.classList.add('dragging');
+                    }, 0);
+                    grabSound.currentTime = 0;
+                    grabSound.play().catch(e => console.log("Grab sound error:", e));
+                });
+                
+                item.addEventListener('dragend', function() {
+                    this.classList.remove('dragging');
+                    draggedItem = null;
+                });
+            });
+            
+            dropTargets.forEach(target => {
+                target.addEventListener('dragover', dragOver);
+                target.addEventListener('dragenter', dragEnter);
+                target.addEventListener('dragleave', dragLeave);
+                
+                target.addEventListener('drop', function() {
+                    setSoundVolume();
+                    this.classList.remove('highlight');
+                    
+                    const existingItem = this.querySelector('.draggable-item');
+                    if (existingItem) {
+                        document.querySelector('.draggable-items').appendChild(existingItem);
+                    }
+                    
+                    this.appendChild(draggedItem);
+                    dropSound.currentTime = 0;
+                    dropSound.play().catch(e => console.log("Drop sound error:", e));
+                    
+                    feedback.textContent = '';
+                    feedback.className = 'feedback';
+                });
+            });
+            
+            checkButton.addEventListener('click', function() {
+                setSoundVolume();
+                let allCorrect = true;
+                const itemsContainer = document.querySelector('.draggable-items');
+                
+                dropTargets.forEach(target => {
+                    const targetWord = target.getAttribute('data-target');
+                    const droppedItem = target.querySelector('.draggable-item');
+                    
+                    if (droppedItem && droppedItem.getAttribute('data-word') === targetWord) {
+                        target.classList.add('correct');
+                        target.classList.remove('incorrect');
+                    } else {
+                        target.classList.add('incorrect');
+                        target.classList.remove('correct');
+                        allCorrect = false;
+                        
+                        // Return incorrect items to draggable area
+                        if (droppedItem) {
+                            itemsContainer.appendChild(droppedItem);
+                        }
+                    }
+                });
+                
+                if (allCorrect) {
+                    feedback.textContent = 'Great job! All matches are correct!';
+                    feedback.className = 'feedback correct-feedback';
+                    successSound.currentTime = 0;
+                    successSound.play().catch(e => console.log("Success sound error:", e));
+                    
+                    // If in Malay, switch back to English
+                    if (isTranslated) {
+                        switchToEnglish();
+                    }
+                } else {
+                    feedback.textContent = 'Some matches are incorrect. Try again!';
+                    feedback.className = 'feedback incorrect-feedback';
+                }
+            });
+            
+            resetButton.addEventListener('click', function() {
+                const itemsContainer = document.querySelector('.draggable-items');
+                draggableItems.forEach(item => {
+                    itemsContainer.appendChild(item);
+                });
+                
+                dropTargets.forEach(target => {
+                    target.classList.remove('correct', 'incorrect', 'highlight');
+                });
+                
+                feedback.textContent = '';
+                feedback.className = 'feedback';
+            });
+            
+            function dragOver(e) {
+                e.preventDefault();
+            }
+            
+            function dragEnter(e) {
+                e.preventDefault();
+                this.classList.add('highlight');
+            }
+            
+            function dragLeave() {
+                this.classList.remove('highlight');
+            }
+        }
+    </script>
+</body>
+</html>
