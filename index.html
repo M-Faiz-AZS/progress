@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordplay</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('./FYP_Website/images/bg.jpg');
+            background-repeat: repeat-x;
+            background-size: cover;
+            animation: moveBackground 10s linear infinite;
+            margin: 0;
+            padding: 0;
+        }
+        @keyframes moveBackground {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: -1000px 0;
+            }
+        }
+        .container {
+            margin-top: 100px;
+        }
+        h1 {
+            font-size: 48px;
+            margin-bottom: 50px;
+        }
+        .menu {
+            display: inline-block;
+            text-align: left;
+        }
+        .menu-item {
+            display: block;
+            padding: 15px 30px;
+            margin: 10px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 24px;
+            transition: background-color 0.3s ease;
+        }
+        .menu-item:hover {
+            background-color: #0056b3;
+        }
+        .contact-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            color: black; /* Set text color to black */
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <audio id="click-sound" src="./FYP_Website/sounds/soundeffect.mp3"></audio>
+    <audio id="bg-music" src="./FYP_Website/sounds/bgmusic.mp3" loop></audio>
+
+    <div class="container">
+        <h1>Wordplay!</h1>
+        <div class="menu">
+            <a href="./FYP_Website/index.html" class="menu-item" id="stage1" onclick="playClickSound(event)">Begin</a>
+        </div>
+    </div>
+
+    <div class="contact-info">
+        <p>Contact us!</p>
+        <p>Faiz: m.faizbina.zamri@gmail.com</p>
+        <p>Naufal: naufalubaidullah@gmail.com</p>
+    </div>
+
+    <script>
+        // Persistent music state
+        let musicState = { 
+            playing: false, 
+            currentTime: 0 
+        };
+
+        // Play background music when page loads
+        window.addEventListener('load', () => {
+            const bgMusic = document.getElementById('bg-music');
+            
+            try {
+                // Restore volume settings
+                const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+                const musicVolume = savedVolumes.musicVolume || 1;
+                
+                // Restore music state from localStorage
+                const savedMusicStateString = localStorage.getItem('musicState');
+                console.log('Saved Music State:', savedMusicStateString);
+                
+                if (savedMusicStateString) {
+                    try {
+                        musicState = JSON.parse(savedMusicStateString);
+                    } catch (parseError) {
+                        console.error('Error parsing saved music state:', parseError);
+                        musicState = { playing: false, currentTime: 0 };
+                    }
+                }
+                
+                // Set volume
+                bgMusic.volume = musicVolume;
+                
+                // Always try to play music
+                bgMusic.play().then(() => {
+                    console.log('Music started playing');
+                    musicState.playing = true;
+                    
+                    // If there's a saved time, set it
+                    if (musicState.currentTime) {
+                        bgMusic.currentTime = musicState.currentTime;
+                    }
+                    
+                    // Update music state in localStorage
+                    localStorage.setItem('musicState', JSON.stringify({
+                        playing: true,
+                        currentTime: bgMusic.currentTime
+                    }));
+                }).catch((error) => {
+                    console.error('Error playing music:', error);
+                    
+                    // Add a user interaction listener as a fallback
+                    document.addEventListener('click', function startMusicOnClick() {
+                        bgMusic.play().then(() => {
+                            console.log('Music started on click');
+                            musicState.playing = true;
+                            
+                            // If there's a saved time, set it
+                            if (musicState.currentTime) {
+                                bgMusic.currentTime = musicState.currentTime;
+                            }
+                            
+                            localStorage.setItem('musicState', JSON.stringify({
+                                playing: true,
+                                currentTime: bgMusic.currentTime
+                            }));
+                            document.removeEventListener('click', startMusicOnClick);
+                        }).catch((err) => {
+                            console.error('Still could not play music:', err);
+                        });
+                    });
+                });
+            } catch (generalError) {
+                console.error('General error in music initialization:', generalError);
+            }
+        });
+
+        function playClickSound(event) {
+            const sound = document.getElementById('click-sound');
+            const bgMusic = document.getElementById('bg-music');
+            
+            // Get saved volume settings
+            const savedVolumes = JSON.parse(localStorage.getItem('volumeSettings') || '{}');
+            const soundVolume = savedVolumes.soundVolume || 1;
+            
+            // Set sound volume
+            sound.volume = soundVolume;
+            
+            // Update music state before navigating
+            musicState.currentTime = bgMusic.currentTime;
+            musicState.playing = !bgMusic.paused;
+            
+            // Always save the current music state before navigating
+            localStorage.setItem('musicState', JSON.stringify({
+                playing: musicState.playing,
+                currentTime: musicState.currentTime
+            }));
+            
+            event.preventDefault();
+
+            // Ensure sound plays before navigation
+            sound.play().then(() => {
+                // Use setTimeout to allow sound to finish
+                setTimeout(() => {
+                    // Navigate to the new page
+                    window.location.href = event.target.href;
+                }, sound.duration * 1000);
+            }).catch((error) => {
+                // If sound fails, still navigate
+                window.location.href = event.target.href;
+            });
+        }
+    </script>
+</body>
+</html>
